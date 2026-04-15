@@ -12,21 +12,35 @@ const gravStrength = 2000;
 
 function create() {
     gameState.player = this.physics.add.sprite(225, 300, 'codey').setScale(.5);
-    
     const platforms = this.physics.add.staticGroup();
     platforms.create(225, 360, 'platform');
     platforms.create(225, -10, 'platform');
     platforms.create(100, 200, 'platform');
 
     const crates = this.physics.add.group();
-    crates.create(50, 300, 'bug1')
-    crates.create(300, 300, 'bug1')
+    crates.create(50, 300, 'bug1').setDragX(20000);
+    crates.create(300, 300, 'bug1').setDragX(20000);
+
+    const spikes = this.physics.add.staticGroup();
+    spikes.create(170, 260, 'bug2');
+
+    const springs = this.physics.add.staticGroup();
+    springs.create(80, 310, 'bug3')
 
     // Add your code below:
     gameState.player.setCollideWorldBounds(true)
     this.physics.add.collider(gameState.player, platforms)
     this.physics.add.collider(gameState.player, crates)
     this.physics.add.collider(crates, platforms)
+
+    this.physics.add.overlap(spikes, gameState.player, () => {
+      this.scene.restart();
+    })
+
+    this.physics.add.overlap(springs, gameState.player, () => {
+      gameState.player.setVelocityY(1000);
+      console.log("hello")
+    })
 
     gameState.cursors = this.input.keyboard.createCursorKeys();
 }
@@ -45,6 +59,11 @@ function update() {
     this.physics.world.gravity.y = gravStrength;
   }
 }
+
+// var addDrag = (obj) => {
+//   obj.body.setDragX(200);
+//   console.log("hello");
+// }
 
 const config = {
   type: Phaser.AUTO,
