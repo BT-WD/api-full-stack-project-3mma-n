@@ -1,69 +1,114 @@
-function preload() {
-  this.load.image('bug1', 'https://content.codecademy.com/courses/learn-phaser/physics/bug_1.png');
-  this.load.image('bug2', 'https://content.codecademy.com/courses/learn-phaser/physics/bug_2.png');
-  this.load.image('bug3', 'https://content.codecademy.com/courses/learn-phaser/physics/bug_3.png');
-  this.load.image('platform', 'https://content.codecademy.com/courses/learn-phaser/physics/platform.png');
-  this.load.image('codey', 'https://content.codecademy.com/courses/learn-phaser/physics/codey.png');
-}
-
 const gameState = {};
-
 const gravStrength = 2000;
+class StartScene extends Phaser.Scene {
+  player = 0;
+  platforms = 0;
+  crates = 0;
+  spikes = 0;
+  springs = 0;
 
-function create() {
+  constructor(key) { 
+    super(key);
+  }
+
+  preload() {
+    this.load.image('bug1', 'https://content.codecademy.com/courses/learn-phaser/physics/bug_1.png');
+    this.load.image('bug2', 'https://content.codecademy.com/courses/learn-phaser/physics/bug_2.png');
+    this.load.image('bug3', 'https://content.codecademy.com/courses/learn-phaser/physics/bug_3.png');
+    this.load.image('platform', 'https://content.codecademy.com/courses/learn-phaser/physics/platform.png');
+    this.load.image('codey', 'https://content.codecademy.com/courses/learn-phaser/physics/codey.png');
+  }
+
+  create() {
+    this.scene.start('Level1');
+  }
+
+  createBase() {
     gameState.player = this.physics.add.sprite(225, 300, 'codey').setScale(.5);
-    const platforms = this.physics.add.staticGroup();
-    platforms.create(225, 360, 'platform');
-    platforms.create(225, -10, 'platform');
-    platforms.create(100, 200, 'platform');
+    this.player = gameState.player
+    
+    this.platforms = this.physics.add.staticGroup();
+    this.platforms.create(225, 360, 'platform');   
+    this.platforms.create(225, -10, 'platform'); 
 
-    const crates = this.physics.add.group();
-    crates.create(50, 300, 'bug1').setDragX(20000);
-    crates.create(300, 300, 'bug1').setDragX(20000);
+    this.crates = this.physics.add.group();
 
-    const spikes = this.physics.add.staticGroup();
-    spikes.create(170, 260, 'bug2');
+    this.spikes = this.physics.add.staticGroup();
+    this.spikes.create(170, 260, 'bug2');
 
-    const springs = this.physics.add.staticGroup();
-    springs.create(80, 310, 'bug3')
+    this.springs = this.physics.add.staticGroup();
+    this.springs.create(350, 330, 'bug3')
 
     // Add your code below:
     gameState.player.setCollideWorldBounds(true)
-    this.physics.add.collider(gameState.player, platforms)
-    this.physics.add.collider(gameState.player, crates)
-    this.physics.add.collider(crates, platforms)
+    this.physics.add.collider(gameState.player, this.platforms)
+    this.physics.add.collider(gameState.player, this.crates)
+    this.physics.add.collider(this.crates, this.platforms)
 
-    this.physics.add.overlap(spikes, gameState.player, () => {
+    this.physics.add.overlap(this.spikes, this.player, () => {
       this.scene.restart();
     })
 
-    this.physics.add.overlap(springs, gameState.player, () => {
-      gameState.player.setVelocityY(1000);
+    this.physics.add.overlap(this.springs, this.player, () => {
+      this.player.setVelocityY(-500);
       console.log("hello")
     })
 
     gameState.cursors = this.input.keyboard.createCursorKeys();
+  }
+
+  update() {
+    if (gameState.cursors.left.isDown) {
+      this.player.setVelocityX(-160);
+    } else if (gameState.cursors.right.isDown) {
+      this.player.setVelocityX(160);
+    } else {
+      this.player.setVelocityX(0);
+    }
+    if (gameState.cursors.up.isDown) {
+      this.physics.world.gravity.y = (gravStrength * -1);
+    } else if (gameState.cursors.down.isDown) {
+      this.physics.world.gravity.y = gravStrength;
+    }
+  }
 }
 
-function update() {
-  if (gameState.cursors.left.isDown) {
-  	gameState.player.setVelocityX(-160);
-	} else if (gameState.cursors.right.isDown) {
- 		gameState.player.setVelocityX(160);
-	} else {
-    gameState.player.setVelocityX(0);
+class Level1 extends StartScene {
+  constructor() { 
+    super({ key: 'Level1' });
   }
-  if (gameState.cursors.up.isDown) {
-    this.physics.world.gravity.y = (gravStrength * -1);
-  } else if (gameState.cursors.down.isDown) {
-    this.physics.world.gravity.y = gravStrength;
+
+  create() {
+    this.createBase();
+    this.platforms.create(100, 200, 'platform');
+    this.crates.create(50, 300, 'bug1').setDragX(20000);
+    this.crates.create(300, 300, 'bug1').setDragX(20000);
+    this.spikes.create(170, 260, 'bug2');
+    this.springs.create(350, 330, 'bug3');
+
+    const exit = this.physics.add.staticSprite(50, 100, 'codey');
+
+    this.physics.add.overlap(exit, this.player, () => {
+      this.scene.start('Level2')
+    })
   }
+
 }
 
-// var addDrag = (obj) => {
-//   obj.body.setDragX(200);
-//   console.log("hello");
-// }
+class Level2 extends StartScene {
+  constructor() { 
+    super({ key: 'Level2' });
+  }
+
+  create() {
+    this.createBase();
+    const exit = this.physics.add.staticSprite(50, 100, 'codey');
+    this.physics.add.overlap(exit, this.player, () => {
+      console.log("done!")
+    })
+  }
+
+}
 
 const config = {
   type: Phaser.AUTO,
@@ -77,11 +122,8 @@ const config = {
       enableBody: true,
     }
   },
-  scene: {
-    preload,
-    create,
-    update
-  }
-};
+  scene: [StartScene, Level1, Level2]
+}
+
 
 const game = new Phaser.Game(config);
