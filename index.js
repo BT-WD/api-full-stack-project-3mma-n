@@ -1,5 +1,6 @@
 const gameState = {};
 const gravStrength = 2000;
+var level = 1;
 class StartScene extends Phaser.Scene {
   player = 0;
   platforms = 0;
@@ -12,11 +13,12 @@ class StartScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('bug1', 'https://content.codecademy.com/courses/learn-phaser/physics/bug_1.png');
-    this.load.image('bug2', 'https://content.codecademy.com/courses/learn-phaser/physics/bug_2.png');
-    this.load.image('bug3', 'https://content.codecademy.com/courses/learn-phaser/physics/bug_3.png');
+    this.load.image('crate', 'assets/crate.png');
+    this.load.image('spikes', 'assets/spikes.png');
+    this.load.image('spring', 'assets/spring.png');
     this.load.image('platform', 'https://content.codecademy.com/courses/learn-phaser/physics/platform.png');
-    this.load.image('codey', 'https://content.codecademy.com/courses/learn-phaser/physics/codey.png');
+    this.load.image('player', 'assets/player.png');
+    this.load.image('exit', 'assets/exit.png');
   }
 
   create() {
@@ -24,7 +26,7 @@ class StartScene extends Phaser.Scene {
   }
 
   createBase() {
-    gameState.player = this.physics.add.sprite(225, 300, 'codey').setScale(.5);
+    gameState.player = this.physics.add.sprite(225, 300, 'player');
     this.player = gameState.player
     
     this.platforms = this.physics.add.staticGroup();
@@ -34,10 +36,10 @@ class StartScene extends Phaser.Scene {
     this.crates = this.physics.add.group();
 
     this.spikes = this.physics.add.staticGroup();
-    this.spikes.create(170, 260, 'bug2');
 
     this.springs = this.physics.add.staticGroup();
-    this.springs.create(350, 330, 'bug3')
+
+    const exit = this.physics.add.staticSprite(50, 100, 'exit');
 
     // Add your code below:
     gameState.player.setCollideWorldBounds(true)
@@ -50,8 +52,13 @@ class StartScene extends Phaser.Scene {
     })
 
     this.physics.add.overlap(this.springs, this.player, () => {
-      this.player.setVelocityY(-500);
+      this.player.setVelocityY(this.physics.world.gravity.y * -0.25);
       console.log("hello")
+    })
+
+    this.physics.add.overlap(exit, this.player, () => {
+      level += 1;
+      this.scene.start(`Level${level}`)
     })
 
     gameState.cursors = this.input.keyboard.createCursorKeys();
@@ -60,8 +67,10 @@ class StartScene extends Phaser.Scene {
   update() {
     if (gameState.cursors.left.isDown) {
       this.player.setVelocityX(-160);
+      this.player.setFlipX(false);
     } else if (gameState.cursors.right.isDown) {
       this.player.setVelocityX(160);
+      this.player.setFlipX(true);
     } else {
       this.player.setVelocityX(0);
     }
@@ -81,16 +90,11 @@ class Level1 extends StartScene {
   create() {
     this.createBase();
     this.platforms.create(100, 200, 'platform');
-    this.crates.create(50, 300, 'bug1').setDragX(20000);
-    this.crates.create(300, 300, 'bug1').setDragX(20000);
-    this.spikes.create(170, 260, 'bug2');
-    this.springs.create(350, 330, 'bug3');
-
-    const exit = this.physics.add.staticSprite(50, 100, 'codey');
-
-    this.physics.add.overlap(exit, this.player, () => {
-      this.scene.start('Level2')
-    })
+    this.crates.create(50, 300, 'crate').setDragX(20000);
+    this.crates.create(300, 300, 'crate').setDragX(20000);
+    this.spikes.create(170, 319, 'spikes');
+    this.springs.create(350, 315, 'spring');
+    this.springs.create(380, 20, 'spring');
   }
 
 }
@@ -102,10 +106,6 @@ class Level2 extends StartScene {
 
   create() {
     this.createBase();
-    const exit = this.physics.add.staticSprite(50, 100, 'codey');
-    this.physics.add.overlap(exit, this.player, () => {
-      console.log("done!")
-    })
   }
 
 }
