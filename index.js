@@ -1,6 +1,7 @@
 const gameState = {};
 const gravStrength = 1000;
 var level = 1;
+var canSwap = true;
 class StartScene extends Phaser.Scene {
   player = 0;
   platforms = 0;
@@ -26,13 +27,13 @@ class StartScene extends Phaser.Scene {
   }
 
   create() {
-    this.scene.start('Level1');
+    this.scene.start('Level5');
   }
 
   createBase() {
-    gameState.player = this.physics.add.sprite(0, 0, 'player').setFlipX(true);
+    gameState.player = this.physics.add.sprite(0, 0, 'player').setFlipX(true)
     this.player = gameState.player
-    
+    this.player.body.setSize(30, 46, true);
     this.platforms = this.physics.add.staticGroup();
     this.platforms.create(240, 342, 'ground');   
     this.platforms.create(240, 18, 'ground').setFlipY(true); 
@@ -47,7 +48,9 @@ class StartScene extends Phaser.Scene {
 
     // Add your code below:
     gameState.player.setCollideWorldBounds(true)
-    this.physics.add.collider(gameState.player, this.platforms)
+    this.physics.add.collider(gameState.player, this.platforms, () => {
+      canSwap = true;
+    })
     this.physics.add.collider(gameState.player, this.crates)
     this.physics.add.collider(this.crates, this.platforms)
 
@@ -116,7 +119,13 @@ class StartScene extends Phaser.Scene {
       } else {
         y += 9;
       }
-      this.spikes.create(x, y, 'spikes').setFlipY(flip);
+      const spike = this.spikes.create(x, y, 'spikes').setFlipY(flip);
+      spike.body.setSize(30, 18, true);
+      if (flip) {
+        spike.body.setOffset(3, -8);
+      } else {
+        spike.body.setOffset(3, 8);
+      }
     }
     if (obj === 'crate') {
       this.crates.create(x, y, 'crate').setFlipY(flip).setDragX(20000);
@@ -172,10 +181,14 @@ class StartScene extends Phaser.Scene {
     } else {
       this.player.setVelocityX(0);
     }
-    if (gameState.cursors.up.isDown) {
+    if (gameState.cursors.up.isDown && canSwap) {
       this.physics.world.gravity.y = (gravStrength * -1);
-    } else if (gameState.cursors.down.isDown) {
+      this.player.setFlipY(true);
+      canSwap = false;
+    } else if (gameState.cursors.down.isDown && canSwap) {
       this.physics.world.gravity.y = gravStrength;
+      this.player.setFlipY(false);
+      canSwap = false;
     }
   }
 }
@@ -235,11 +248,29 @@ class Level4 extends StartScene {
   }
 }
 
+class Level5 extends StartScene {
+  constructor() { 
+    super({ key: 'Level5' });
+  }
+
+  create() {
+    this.createBase();
+    this.placePlayer(0, 2);
+    this.platformTile(4,1,3)
+    this.placeExit(10, 1);
+    this.spikeTile(7, 1, 1)
+    this.spikeTile(0, 8, 12, true)
+    this.placeObject(5,2,'crate')
+    this.placeObject(3, 1, 'spring')
+  }
+}
+
 const config = {
   type: Phaser.AUTO,
   width: 432,
   height: 360,
   backgroundColor: "b9eaff",
+  parent: "game-container",
   physics: {
     default: 'arcade',
     arcade: {
@@ -250,7 +281,7 @@ const config = {
   render: {
     pixelArt: true
   },
-  scene: [StartScene, Level1, Level2, Level3, Level4]
+  scene: [StartScene, Level1, Level2, Level3, Level4, Level5]
 }
 
 
