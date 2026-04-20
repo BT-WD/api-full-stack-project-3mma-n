@@ -4,9 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>API Full Stack Project</title>
+    <link rel="stylesheet" href="index.css">
   </head>
   <body>
     <!-- You code goes here-->
+     <h1>Gravity Platformer</h1>
+     <div id="game-container"></div>
+     Username:
+     <input></input>
+     <button>Save Data</button>
+     <button>Load Data</button>
+     
+     <div id="instructions">
+      <h3>Instructions:</h3>
+      <p id="instructions">Left and Right Arrow Keys to move. Up and Down to flip gravity. 
+        Touching a spike will reset the level, and reaching the exit door
+        will take you to the next one. Springs and pushable crates will
+        help you reach the door while avoiding spikes. Enter a username and
+        use the save and load buttons to store and retrieve your progress.
+      </p>
+     </div>
      <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
      <script src="index.js"></script>
   </body>

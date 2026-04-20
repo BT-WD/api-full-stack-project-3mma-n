@@ -1,1 +1,10 @@
+#instructions {
+    max-width: 50ch;
+    line-height: 1.5;
+}
 
+body, #instructions {
+  margin: 0 auto;
+  text-align: center;
+  font-family: 'Lucida Console';
+}
