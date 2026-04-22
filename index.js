@@ -1,7 +1,8 @@
 const gameState = {};
 const gravStrength = 1000;
-var level = 1;
+var level = parseInt(localStorage.getItem("Level"));
 var canSwap = true;
+var deaths = parseInt(localStorage.getItem("Deaths"));
 class StartScene extends Phaser.Scene {
   player = 0;
   platforms = 0;
@@ -27,10 +28,16 @@ class StartScene extends Phaser.Scene {
   }
 
   create() {
-    this.scene.start('Level5');
+    if (level < 1) {
+      level = 1;
+    }
+    this.scene.start(`Level${level}`)
   }
 
   createBase() {
+    localStorage.setItem('Level', level);
+    this.exit = this.physics.add.staticSprite(0, 0, 'exit');
+
     gameState.player = this.physics.add.sprite(0, 0, 'player').setFlipX(true)
     this.player = gameState.player
     this.player.body.setSize(30, 46, true);
@@ -44,27 +51,41 @@ class StartScene extends Phaser.Scene {
 
     this.springs = this.physics.add.staticGroup();
 
-    this.exit = this.physics.add.staticSprite(0, 0, 'exit');
-
     // Add your code below:
     gameState.player.setCollideWorldBounds(true)
     this.physics.add.collider(gameState.player, this.platforms, () => {
       canSwap = true;
     })
-    this.physics.add.collider(gameState.player, this.crates)
+    this.physics.add.collider(gameState.player, this.crates, () => {
+      canSwap = true;
+    });
     this.physics.add.collider(this.crates, this.platforms)
 
     this.physics.add.overlap(this.spikes, this.player, () => {
+      deaths += 1
+      console.log(deaths)
       this.scene.restart();
+    })
+
+    this.physics.add.overlap(this.spikes, this.crates, (spike, crate) => {
+      spike.destroy();
+    })
+
+    this.physics.add.overlap(this.springs, this.crates, (spring, crate) => {
+      spring.destroy();
     })
 
     this.physics.add.overlap(this.springs, this.player, () => {
       this.player.setVelocityY(this.physics.world.gravity.y * -0.5);
+      canSwap = false;
     })
 
     this.physics.add.overlap(this.exit, this.player, () => {
-      level += 1;
-      this.scene.start(`Level${level}`)
+      if (canSwap && Math.abs(this.player.y - this.exit.y) < 18) {
+        level += 1;
+        this.scene.start(`Level${level}`)
+        console.log(`Level${level}`)
+      }
     })
 
     gameState.cursors = this.input.keyboard.createCursorKeys();
@@ -258,11 +279,62 @@ class Level5 extends StartScene {
     this.placePlayer(0, 2);
     this.platformTile(4,1,3)
     this.placeExit(10, 1);
-    this.spikeTile(7, 1, 1)
+    this.spikeTile(7, 1, 2)
     this.spikeTile(0, 8, 12, true)
     this.placeObject(5,2,'crate')
     this.placeObject(3, 1, 'spring')
   }
+}
+
+class Level6 extends StartScene {
+  constructor() { 
+    super({ key: 'Level6' });
+  }
+
+  create() {
+    this.createBase();
+    this.placePlayer(1, 1);
+    this.platformTile(3,1,4, true)
+    this.platformTile(0,8,5)
+    this.placeExit(10, 8, true);
+    this.spikeTile(5, 8, 1, true)
+    this.spikeTile(6, 1, 6)
+    this.placeObject(5,1,'crate')
+  }
+}
+
+class Level7 extends StartScene {
+  constructor() { 
+    super({ key: 'Level7' });
+  }
+
+  create() {
+    this.createBase();
+    this.placePlayer(1, 1);
+    this.platformTile(0,4,4)
+    this.placeExit(6, 7, true);
+    this.spikeTile(0, 8, 12, true)
+    this.placeObject(3,1,'crate')
+  }
+
+}
+
+class Level8 extends StartScene {
+  constructor() { 
+    super({ key: 'Level8' });
+  }
+
+  create() {
+    this.createBase();
+    this.placePlayer(1, 1);
+    this.platformTile(0,7,4)
+    this.spikeTile(0, 6, 4, true)
+    this.placeExit(2, 5, true);
+    this.placeObject(7,1,'crate')
+    this.placeObject(5, 1, 'spring')
+    this.placeObject(5, 8, 'spring', true)
+  }
+
 }
 
 const config = {
@@ -281,8 +353,16 @@ const config = {
   render: {
     pixelArt: true
   },
-  scene: [StartScene, Level1, Level2, Level3, Level4, Level5]
+  scene: [StartScene, Level1, Level2, Level3, Level4, Level5, Level6, Level7, Level8]
 }
 
+function resetSave() {
+  localStorage.setItem("Level", 1);
+  localStorage.setItem("Deaths", 0);
+  level = 1
+  deaths = 0
+  gameState.scene.start(`Level1`)
+  console.log("reset")
+}
 
 const game = new Phaser.Game(config);
