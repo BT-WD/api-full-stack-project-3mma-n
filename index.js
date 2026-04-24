@@ -79,6 +79,7 @@ class StartScene extends Phaser.Scene {
     })
 
     this.physics.add.overlap(this.springs, this.crates, (spring, crate) => {
+      crate.setVelocityY(this.physics.world.gravity.y * -0.5);
       spring.destroy();
     })
 
@@ -343,7 +344,22 @@ class Level8 extends StartScene {
     this.placeObject(5, 1, 'spring')
     this.placeObject(5, 8, 'spring', true)
   }
+}
 
+class Level9 extends StartScene {
+  constructor() { 
+    super({ key: 'Level9' });
+  }
+
+  create() {
+    this.createBase();
+    this.placePlayer(1, 1);
+    this.platformTile(3,5,6)
+    this.spikeTile(3, 4, 6, true)
+    this.placeExit(5, 4, true);
+    this.placeObject(7,6,'crate')
+    this.placeObject(5, 1, 'spring')
+  }
 }
 
 const config = {
@@ -362,7 +378,7 @@ const config = {
   render: {
     pixelArt: true
   },
-  scene: [StartScene, Level1, Level2, Level3, Level4, Level5, Level6, Level7, Level8]
+  scene: [StartScene, Level1, Level2, Level3, Level4, Level5, Level6, Level7, Level8, Level9]
 }
 
 function resetSave() {
