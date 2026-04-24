@@ -3,6 +3,7 @@ const gravStrength = 1000;
 var level = parseInt(localStorage.getItem("Level"));
 var canSwap = true;
 var deaths = parseInt(localStorage.getItem("Deaths"));
+var logDeath = true;
 class StartScene extends Phaser.Scene {
   player = 0;
   platforms = 0;
@@ -35,7 +36,9 @@ class StartScene extends Phaser.Scene {
   }
 
   createBase() {
+    logDeath = true;
     localStorage.setItem('Level', level);
+    localStorage.setItem('Deaths', deaths);
     this.exit = this.physics.add.staticSprite(0, 0, 'exit');
 
     gameState.player = this.physics.add.sprite(0, 0, 'player').setFlipX(true)
@@ -62,9 +65,13 @@ class StartScene extends Phaser.Scene {
     this.physics.add.collider(this.crates, this.platforms)
 
     this.physics.add.overlap(this.spikes, this.player, () => {
-      deaths += 1
-      console.log(deaths)
-      this.scene.restart();
+      if (logDeath) {
+        deaths += 1
+        logDeath = false;
+        console.log(deaths)
+        document.getElementById("death-num").textContent = deaths;
+        this.scene.restart();
+      }
     })
 
     this.physics.add.overlap(this.spikes, this.crates, (spike, crate) => {
@@ -83,6 +90,7 @@ class StartScene extends Phaser.Scene {
     this.physics.add.overlap(this.exit, this.player, () => {
       if (canSwap && Math.abs(this.player.y - this.exit.y) < 18) {
         level += 1;
+        document.getElementById("lvl-num").textContent = level;
         this.scene.start(`Level${level}`)
         console.log(`Level${level}`)
       }
@@ -237,6 +245,7 @@ class Level2 extends StartScene {
     this.placePlayer(1, 1);
     this.placeExit(9,1);
     this.platformTile(5,1,5,true)
+    this.placeObject(5, 6, 'spikes');
   }
 }
 
@@ -357,12 +366,17 @@ const config = {
 }
 
 function resetSave() {
+  game.scene.stop(`Level${level}`)
   localStorage.setItem("Level", 1);
   localStorage.setItem("Deaths", 0);
   level = 1
   deaths = 0
-  gameState.scene.start(`Level1`)
-  console.log("reset")
+  document.getElementById("lvl-num").textContent = level;
+  document.getElementById("death-num").textContent = deaths;
+  game.scene.start("Level1")
 }
 
 const game = new Phaser.Game(config);
+document.getElementById("lvl-num").textContent = level;
+console.log(deaths)
+document.getElementById("death-num").textContent = deaths;

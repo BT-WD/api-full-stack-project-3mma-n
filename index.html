@@ -10,10 +10,25 @@
     <!-- You code goes here-->
      <h1>Gravity Platformer</h1>
      <div id="game-container"></div>
-     Username:
-     <input></input>
      <button id='reset-btn' onclick=resetSave()>Reset Save</button>
-     
+     <table>
+      <tr>
+        <th>
+          <p>Level:</p>
+        </th>
+        <th>
+          <p>Deaths:</p>
+        </th>
+      </tr>
+      <tr>
+        <td>
+          <p id="lvl-num">0</p>
+        </td>
+        <td>
+          <p id="death-num">0</p>
+        </td>
+      </tr>
+     </table>
      <div id="instructions">
       <h3>Instructions:</h3>
       <p id="instructions">Left and Right Arrow Keys to move. Up and Down to flip gravity. 
